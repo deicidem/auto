@@ -17,5 +17,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Auto.Data\Auto.Data.csproj" />
+		<ProjectReference Include="..\Auto.Messages\Auto.Messages.csproj" />
 	</ItemGroup>
 </Project>

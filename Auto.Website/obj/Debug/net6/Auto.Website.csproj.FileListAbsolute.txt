@@ -83,3 +83,5 @@ D:\Auto\Auto.Website\bin\Debug\net6\GraphQL.NewtonsoftJson.dll
 D:\Auto\Auto.Website\bin\Debug\net6\GraphQL.Server.Transports.AspNetCore.dll
 D:\Auto\Auto.Website\bin\Debug\net6\GraphQL.SystemTextJson.dll
 D:\Auto\Auto.Website\bin\Debug\net6\RabbitMQ.Client.dll
+D:\Auto\Auto.Website\bin\Debug\net6\Auto.Messages.dll
+D:\Auto\Auto.Website\bin\Debug\net6\Auto.Messages.pdb

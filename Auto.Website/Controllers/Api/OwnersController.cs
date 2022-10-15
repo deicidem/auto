@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Auto.Data;
 using Auto.Data.Entities;
+using Auto.Messages;
 using Auto.Website.Models;
 using Castle.Core.Internal;
+using EasyNetQ;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -13,10 +15,12 @@ namespace Auto.Website.Controllers.Api {
     [Route("api/[controller]")]
 	[ApiController]
 	public class OwnersController : ControllerBase {
-		private readonly IAutoDatabase db;
+		private readonly IAutoDatabase _db;
+		private readonly IBus _bus;
 
-		public OwnersController(IAutoDatabase db) {
-			this.db = db;
+		public OwnersController(IAutoDatabase db, IBus bus) {
+			this._db = db;
+			this._bus = bus;
 		}
 
 		private dynamic Paginate(string url, int index, int count, int total) {
@@ -32,8 +36,8 @@ namespace Auto.Website.Controllers.Api {
 		[HttpGet]
 		[Produces("application/hal+json")]
 		public IActionResult Get(int index = 0, int count = 10) {
-			var items = db.ListOwners().Skip(index).Take(count);
-			var total = db.CountOwners();
+			var items = _db.ListOwners().Skip(index).Take(count);
+			var total = _db.CountOwners();
 			var _links = Paginate("/api/owners", index, count, total);
 			var _actions = new {
 				create = new {
@@ -57,7 +61,7 @@ namespace Auto.Website.Controllers.Api {
 		// GET api/owners/test@example.ru
 		[HttpGet("{id}")]
 		public IActionResult Get(string id) {
-			var owner = db.FindOwner(id);
+			var owner = _db.FindOwner(id);
 			if (owner == default) return NotFound();
 			var json = owner.ToDynamic();
 			json._links = new {
@@ -87,8 +91,8 @@ namespace Auto.Website.Controllers.Api {
 				LastName = dto.LastName,
 				VehicleRegistration = dto.VehicleRegistration
 			};
-			db.CreateOwner(owner);
-			
+			_db.CreateOwner(owner);
+			PublishNewOwnerMessage(owner);
 			return Ok(dto);
 		}
 
@@ -99,7 +103,7 @@ namespace Auto.Website.Controllers.Api {
 		public IActionResult Put(string id, [FromBody] dynamic dto) {
 			var ownerVehicleHref = dto._links.ownerVehicle.href;
 			var ownerVehicleRegistration = VehiclesController.ParseVehicleId(ownerVehicleHref);
-			var ownerVehicle = db.FindVehicle(ownerVehicleRegistration);
+			var ownerVehicle = _db.FindVehicle(ownerVehicleRegistration);
 			
 			var owner = new Owner {
 				Email = id,
@@ -107,22 +111,37 @@ namespace Auto.Website.Controllers.Api {
 				LastName = dto.LastName,
 				VehicleRegistration = ownerVehicle.Registration
 			};
-			db.UpdateOwner(owner);
+			_db.UpdateOwner(owner);
 			return Get(id);
 		}
 
 		// DELETE api/owners/ABC123
 		[HttpDelete("{id}")]
 		public IActionResult Delete(string id) {
-			var owner = db.FindOwner(id);
+			var owner = _db.FindOwner(id);
 			if (owner == default) return NotFound();
-			db.DeleteOwner(owner);
+			_db.DeleteOwner(owner);
 			return NoContent();
 		}
 		
 		public static string ParseOwnerId(dynamic href) {
 			var tokens = ((string)href).Split("/");
 			return tokens.Last();
+		}
+		
+		private void PublishNewOwnerMessage(Owner owner)
+		{
+			var message =  new NewOwnerMessage()
+			{
+				Email = owner.Email,
+				FirstName = owner.FirstName,
+				LastName = owner.LastName,
+				VehicleRegistation = owner?.OwnerVehicle?.Registration ?? string.Empty,
+				VehicleModelCode = owner?.OwnerVehicle?.VehicleModel.Code ?? string.Empty,
+				VehicleModelName = owner?.OwnerVehicle?.VehicleModel.Name ?? string.Empty,
+				ListedAtUtc = DateTime.UtcNow
+			};
+			_bus.PubSub.Publish(message);
 		}
 	}
 }

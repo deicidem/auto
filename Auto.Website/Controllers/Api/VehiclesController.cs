@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Auto.Data;
 using Auto.Data.Entities;
+using Auto.Messages;
 using Auto.Website.Models;
 using Castle.Core.Internal;
+using EasyNetQ;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -13,10 +15,11 @@ namespace Auto.Website.Controllers.Api {
     [Route("api/[controller]")]
 	[ApiController]
 	public class VehiclesController : ControllerBase {
-		private readonly IAutoDatabase db;
-
-		public VehiclesController(IAutoDatabase db) {
-			this.db = db;
+		private readonly IAutoDatabase _db;
+		private readonly IBus _bus;
+		public VehiclesController(IAutoDatabase db, IBus bus) {
+			this._db = db;
+			this._bus = bus;
 		}
 		private dynamic Paginate(string url, int index, int count, int total) {
 			dynamic links = new ExpandoObject();
@@ -31,8 +34,8 @@ namespace Auto.Website.Controllers.Api {
 		[HttpGet]
 		[Produces("application/hal+json")]
 		public IActionResult Get(int index = 0, int count = 10) {
-			var items = db.ListVehicles().Skip(index).Take(count);
-			var total = db.CountVehicles();
+			var items = _db.ListVehicles().Skip(index).Take(count);
+			var total = _db.CountVehicles();
 			var _links = Paginate("/api/vehicles", index, count, total);
 			var _actions = new {
 				create = new {
@@ -56,7 +59,7 @@ namespace Auto.Website.Controllers.Api {
 		// GET api/vehicles/ABC123
 		[HttpGet("{id}")]
 		public IActionResult Get(string id) {
-			var vehicle = db.FindVehicle(id);
+			var vehicle = _db.FindVehicle(id);
 			if (vehicle == default) return NotFound();
 			var json = vehicle.ToDynamic();
 			json._links = new {
@@ -81,8 +84,8 @@ namespace Auto.Website.Controllers.Api {
 		// POST api/vehicles
 		[HttpPost]
 		public async Task<IActionResult> Post([FromBody] VehicleDto dto) {
-			var vehicleModel = db.FindModel(dto.ModelCode);
-			var vehicleOwner = db.FindOwner(dto.OwnerEmail);
+			var vehicleModel = _db.FindModel(dto.ModelCode);
+			var vehicleOwner = _db.FindOwner(dto.OwnerEmail);
 			var vehicle = new Vehicle {
 				Registration = dto.Registration,
 				Color = dto.Color,
@@ -90,8 +93,8 @@ namespace Auto.Website.Controllers.Api {
 				VehicleModel = vehicleModel,
 				VehicleOwner = vehicleOwner
 			};
-			db.CreateVehicle(vehicle);
-			
+			_db.CreateVehicle(vehicle);
+			PublishNewVehicleMessage(vehicle);
 			return Ok(dto);
 		}
 
@@ -102,11 +105,11 @@ namespace Auto.Website.Controllers.Api {
 		public IActionResult Put(string id, [FromBody] dynamic dto) {
 			var vehicleModelHref = dto._links.vehicleModel.href;
 			var vehicleModelId = ModelsController.ParseModelId(vehicleModelHref);
-			var vehicleModel = db.FindModel(vehicleModelId);
+			var vehicleModel = _db.FindModel(vehicleModelId);
 			
 			var vehicleOwnerHref = dto._links.vehicleOwner.href;
 			var vehicleOwnerEmail = OwnersController.ParseOwnerId(vehicleOwnerHref);
-			var vehicleOwner = db.FindModel(vehicleOwnerEmail);
+			var vehicleOwner = _db.FindModel(vehicleOwnerEmail);
 			
 			var vehicle = new Vehicle {
 				Registration = id,
@@ -115,16 +118,16 @@ namespace Auto.Website.Controllers.Api {
 				ModelCode = vehicleModel.Code,
 				OwnerEmail = vehicleOwner.Email
 			};
-			db.UpdateVehicle(vehicle);
+			_db.UpdateVehicle(vehicle);
 			return Get(id);
 		}
 
 		// DELETE api/vehicles/ABC123
 		[HttpDelete("{id}")]
 		public IActionResult Delete(string id) {
-			var vehicle = db.FindVehicle(id);
+			var vehicle = _db.FindVehicle(id);
 			if (vehicle == default) return NotFound();
-			db.DeleteVehicle(vehicle);
+			_db.DeleteVehicle(vehicle);
 			return NoContent();
 		}
 		
@@ -132,5 +135,22 @@ namespace Auto.Website.Controllers.Api {
 			var tokens = ((string)href).Split("/");
 			return tokens.Last();
 		}
+
+		private void PublishNewVehicleMessage(Vehicle vehicle)
+		{
+			var message =  new NewVehicleMessage()
+			{
+				Registration = vehicle.Registration,
+				Manufacturer = vehicle.VehicleModel?.Manufacturer?.Name ?? string.Empty,
+				ModelName = vehicle.VehicleModel?.Name ?? string.Empty,
+				ModelCode = vehicle.VehicleModel?.Code ?? string.Empty,
+				OwnerEmail = vehicle.VehicleOwner?.Email ?? string.Empty,
+				Color = vehicle.Color,
+				Year = vehicle.Year,
+				ListedAtUtc = DateTime.UtcNow
+			};
+			_bus.PubSub.Publish(message);
+		}
+		
 	}
 }

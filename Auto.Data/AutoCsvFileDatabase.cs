@@ -150,6 +150,7 @@ namespace Auto.Data {
         }
         
         public void CreateOwner(Owner owner) {
+            owner.OwnerVehicle = FindVehicle(owner.VehicleRegistration);
             UpdateOwner(owner);
         }
 

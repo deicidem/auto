@@ -9,6 +9,7 @@
       "Auto.Website/1.0.0": {
         "dependencies": {
           "Auto.Data": "1.0.0",
+          "Auto.Messages": "1.0.0",
           "Microsoft.AspNetCore.Mvc.NewtonsoftJson": "3.1.16",
           "Microsoft.Extensions.Logging": "6.0.0",
           "Swashbuckle.AspNetCore": "6.4.0",
@@ -1574,6 +1575,11 @@
         "runtime": {
           "Auto.Data.dll": {}
         }
+      },
+      "Auto.Messages/1.0.0": {
+        "runtime": {
+          "Auto.Messages.dll": {}
+        }
       }
     }
   },
@@ -2683,6 +2689,11 @@
       "hashPath": "system.xml.xmlserializer.4.3.0.nupkg.sha512"
     },
     "Auto.Data/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Auto.Messages/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

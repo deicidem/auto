@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 
 namespace Auto.Website {
-    public class Program {
+    public class   Program {
         public static void Main(string[] args) {
             Console.WriteLine("Starting Auto.Website...");
             CreateHostBuilder(args).Build().Run();

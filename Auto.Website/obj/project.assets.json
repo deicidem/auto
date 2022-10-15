@@ -2883,6 +2883,16 @@
         "runtime": {
           "bin/placeholder/Auto.Data.dll": {}
         }
+      },
+      "Auto.Messages/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v6.0",
+        "compile": {
+          "bin/placeholder/Auto.Messages.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Auto.Messages.dll": {}
+        }
       }
     }
   },
@@ -8902,11 +8912,17 @@
       "type": "project",
       "path": "../Auto.Data/Auto.Data.csproj",
       "msbuildProject": "../Auto.Data/Auto.Data.csproj"
+    },
+    "Auto.Messages/1.0.0": {
+      "type": "project",
+      "path": "../Auto.Messages/Auto.Messages.csproj",
+      "msbuildProject": "../Auto.Messages/Auto.Messages.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net6.0": [
       "Auto.Data >= 1.0.0",
+      "Auto.Messages >= 1.0.0",
       "Microsoft.AspNetCore.Mvc.NewtonsoftJson >= 3.1.16",
       "Microsoft.Extensions.Logging >= 6.0.0",
       "Swashbuckle.AspNetCore >= 6.4.0",
@@ -8940,6 +8956,9 @@
           "projectReferences": {
             "D:\\Auto\\Auto.Data\\Auto.Data.csproj": {
               "projectPath": "D:\\Auto\\Auto.Data\\Auto.Data.csproj"
+            },
+            "D:\\Auto\\Auto.Messages\\Auto.Messages.csproj": {
+              "projectPath": "D:\\Auto\\Auto.Messages\\Auto.Messages.csproj"
             }
           }
         }

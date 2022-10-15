@@ -117,6 +117,59 @@
         }
       }
     },
+    "D:\\Auto\\Auto.Messages\\Auto.Messages.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Auto\\Auto.Messages\\Auto.Messages.csproj",
+        "projectName": "Auto.Messages",
+        "projectPath": "D:\\Auto\\Auto.Messages\\Auto.Messages.csproj",
+        "packagesPath": "C:\\Users\\krono\\.nuget\\packages\\",
+        "outputPath": "D:\\Auto\\Auto.Messages\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\krono\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Users\\krono\\.dotnet\\sdk\\6.0.400\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
     "D:\\Auto\\Auto.Website\\Auto.Website.csproj": {
       "version": "1.0.0",
       "restore": {
@@ -141,6 +194,9 @@
             "projectReferences": {
               "D:\\Auto\\Auto.Data\\Auto.Data.csproj": {
                 "projectPath": "D:\\Auto\\Auto.Data\\Auto.Data.csproj"
+              },
+              "D:\\Auto\\Auto.Messages\\Auto.Messages.csproj": {
+                "projectPath": "D:\\Auto\\Auto.Messages\\Auto.Messages.csproj"
               }
             }
           }
